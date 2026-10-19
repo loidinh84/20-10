@@ -1,4 +1,17 @@
+# Dependencies
 node_modules/
+
+# Production build output
 dist/
+
+# Local environment variables (bảo mật link lì xì và cấu hình cá nhân)
+.env
+.env.local
+.env.*.local
+
+# Operating System & Editor files
 .DS_Store
+Thumbs.db
 *.local
+.vscode/
+.idea/
