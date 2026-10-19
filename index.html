@@ -204,20 +204,36 @@
             <i class="fa-solid fa-heart"></i> Món quà nhỏ gửi tặng Công Chúa Bích Trâm nhân ngày 20/10
           </p>
 
+          <!-- Thông báo Ting Ting Biến động số dư ZaloPay giả lập rơi xuống siêu bất ngờ -->
+          <div class="fake-notification" id="fakeNotification">
+            <div class="notif-icon"><i class="fa-solid fa-bell"></i></div>
+            <div class="notif-content">
+              <div class="notif-header">
+                <span class="notif-app">ZaloPay • Vừa xong</span>
+                <span class="notif-badge">+50.000đ</span>
+              </div>
+              <div class="notif-body">
+                <strong>Ting Ting!</strong> Em nhận được <b>50.000đ</b> từ Anh Người Yêu ❤️
+                <div class="notif-memo">"Chúc mừng ngày 20/10 Công Chúa Bích Trâm của anh!"</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Tùy chọn chuyển tab quét QR (Napas Ngân Hàng Bản Việt & ZaloPay) -->
           <div class="qr-switch-tabs">
             <button class="qr-tab-btn active" id="tabBankQR" data-mode="bank">
-              <i class="fa-solid fa-building-columns"></i> Quét Bằng Mọi App Ngân Hàng
+              <i class="fa-solid fa-wallet"></i> Mã ZaloPay Gốc Của Bích Trâm
             </button>
-            <button class="qr-tab-btn" id="tabZaloQR" data-mode="zalopay">
-              <i class="fa-solid fa-wallet"></i> Quét Bằng App ZaloPay
+            <button class="qr-tab-btn" id="tabNapasQR" data-mode="napas">
+              <i class="fa-solid fa-building-columns"></i> Quét Bằng Mọi App Ngân Hàng
             </button>
           </div>
 
           <!-- Khu vực hiển thị mã VietQR nhận tiền -->
           <div class="qr-payment-section">
             <div class="qr-frame">
-              <img id="vietQrImg" src="" alt="Mã VietQR Chuyển Tiền Lì Xì 20/10" class="qr-image">
+              <div id="zalopayQrBox"></div>
+              <img id="vietQrImg" src="" alt="Mã VietQR Chuyển Tiền Lì Xì 20/10" class="qr-image" style="display:none;">
               <div class="qr-loading" id="qrLoading">
                 <i class="fa-solid fa-spinner fa-spin"></i>
                 <span>Đang tải mã QR chuyển khoản...</span>
@@ -225,7 +241,7 @@
             </div>
 
             <p class="qr-scan-guide" id="qrScanGuide">
-              ✨ <i>Dùng bất kỳ App Ngân hàng nào (VCB, MB, Techcombank, VPBank...) quét mã trên để nhận tiền ngay nhé!</i>
+              ✨ <i>Mã ZaloPay chính thức của Bích Trâm. Anh yêu (hoặc bạn bè) quét mã này là 50.000đ ting ting về ví ngay!</i>
             </p>
 
             <div class="payment-info-box">

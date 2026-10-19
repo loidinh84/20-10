@@ -884,7 +884,94 @@ body {
 .money-meaning {
   font-size: 0.82rem;
   color: #ffe6ed;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
+}
+
+/* Thông báo Ting Ting Biến động số dư ZaloPay rơi xuống */
+.fake-notification {
+  background: rgba(18, 7, 16, 0.95);
+  border: 1px solid rgba(0, 200, 100, 0.45);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  margin-bottom: 16px;
+  animation: slideDownNotif 0.7s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+@keyframes slideDownNotif {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.notif-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #00c853, #00897b);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 200, 83, 0.3);
+}
+
+.notif-content {
+  flex: 1;
+}
+
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.notif-app {
+  font-size: 0.74rem;
+  color: #a7f3d0;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.notif-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.notif-body {
+  font-size: 0.82rem;
+  color: #ffffff;
+  line-height: 1.4;
+}
+
+.notif-memo {
+  font-size: 0.76rem;
+  color: #fbcfe8;
+  font-style: italic;
+  margin-top: 3px;
+}
+
+#zalopayQrBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#zalopayQrBox img, #zalopayQrBox canvas {
+  display: block;
+  margin: 0 auto;
+  border-radius: 4px;
 }
 
 /* Tabs chuyển đổi Quét bằng App Ngân Hàng vs ZaloPay */

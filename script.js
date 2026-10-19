@@ -746,33 +746,32 @@ function launchVictoryConfetti() {
 // ==========================================================
 // 9. MÃ VIETQR CHUẨN NAPAS247 (QUÉT ĐƯỢC 100%)
 // ==========================================================
+// Chuỗi mã QR ZaloPay chính thức của Phạm Thị Bích Trâm (được trích xuất trực tiếp từ ảnh gốc)
+const EXACT_ZALOPAY_QR_STRING = "00020101021126400010vn.zalopay0115ghEsu2IXKnIlZza020300238620010A00000072701320006970454011899ZP26286M801958080208QRIBFTTA5204739953037045802VN63048462";
+
 function initVietQR() {
   const tabBankQR = document.getElementById("tabBankQR");
-  const tabZaloQR = document.getElementById("tabZaloQR");
+  const tabNapasQR = document.getElementById("tabNapasQR");
   const qrScanGuide = document.getElementById("qrScanGuide");
   const btnCustomAccount = document.getElementById("btnCustomAccount");
   const customBankForm = document.getElementById("customBankForm");
   const btnGenerateCustomQR = document.getElementById("btnGenerateCustomQR");
 
-  // Tab chuyển đổi quét bằng Ngân Hàng hoặc ZaloPay
-  if (tabBankQR && tabZaloQR) {
+  // Tab chuyển đổi quét bằng ZaloPay gốc hoặc Napas Bản Việt
+  if (tabBankQR && tabNapasQR) {
     tabBankQR.addEventListener("click", () => {
       tabBankQR.classList.add("active");
-      tabZaloQR.classList.remove("active");
-      currentQrMode = "bank";
-      CONFIG.recipient.bankId = "970454"; // BIN Bản Việt
-      CONFIG.recipient.bankName = "Ngân hàng TMCP Bản Việt (BVBank)";
-      if (qrScanGuide) qrScanGuide.innerHTML = "✨ <i>Dùng bất kỳ App Ngân hàng nào (VCB, MB, Techcombank, VPBank...) quét mã trên để nhận tiền ngay nhé!</i>";
+      tabNapasQR.classList.remove("active");
+      currentQrMode = "zalopay";
+      if (qrScanGuide) qrScanGuide.innerHTML = "✨ <i>Mã ZaloPay gốc của Bích Trâm. Anh yêu (hoặc bạn bè) quét mã này bằng ZaloPay hoặc App Ngân hàng là 50.000đ ting ting về ví ngay!</i>";
       updateVietQRDisplay();
     });
 
-    tabZaloQR.addEventListener("click", () => {
-      tabZaloQR.classList.add("active");
+    tabNapasQR.addEventListener("click", () => {
+      tabNapasQR.classList.add("active");
       tabBankQR.classList.remove("active");
-      currentQrMode = "zalopay";
-      CONFIG.recipient.bankId = "971101"; // BIN ZaloPay
-      CONFIG.recipient.bankName = "Ví Điện Tử ZaloPay";
-      if (qrScanGuide) qrScanGuide.innerHTML = "✨ <i>Mở App ZaloPay quét mã QR trên để nhận 50.000đ vào ví nhé!</i>";
+      currentQrMode = "napas";
+      if (qrScanGuide) qrScanGuide.innerHTML = "✨ <i>Dùng bất kỳ App Ngân hàng nào (VCB, MB, Techcombank, VPBank...) quét mã VietQR Napas này nhé!</i>";
       updateVietQRDisplay();
     });
   }
@@ -813,6 +812,7 @@ function initVietQR() {
       CONFIG.recipient.accountNo = accountInput.value.trim();
       CONFIG.recipient.accountName = (nameInput.value.trim() || "PHAM THI BICH TRAM").toUpperCase();
 
+      currentQrMode = "napas";
       updateVietQRDisplay();
       customBankForm.classList.remove("open");
       showToast("Đã cập nhật mã VietQR theo số tài khoản mới!");
@@ -823,10 +823,10 @@ function initVietQR() {
   const btnClaimZalo = document.getElementById("btnClaimZalo");
   if (btnClaimZalo) {
     btnClaimZalo.addEventListener("click", () => {
-      const message = `Anh yêu ơi! Em vừa vượt qua thử thách 20/10 trên web rồi nè ❤️ Mau ting ting lì xì ${CONFIG.recipient.amount.toLocaleString()}đ vào STK ${CONFIG.recipient.accountNo} (${CONFIG.recipient.bankName}) cho Bích Trâm nhé! Yêu anh nhiều 💕`;
+      const message = `Anh yêu ơi! Em vừa vượt qua thử thách 20/10 trên web rồi nè ❤️ Mau ting ting lì xì ${CONFIG.recipient.amount.toLocaleString()}đ vào ví ZaloPay cho Bích Trâm nhé! Yêu anh nhiều 💕`;
 
       navigator.clipboard.writeText(message).then(() => {
-        showToast("Đã sao chép lời nhắn đòi quà! Mở Zalo/Messenger gửi cho Anh nhé!");
+        showToast("Đã sao chép lời nhắn đòi quà! Mở Zalo gửi cho Anh nhé!");
       }).catch(() => {});
 
       setTimeout(() => {
@@ -838,6 +838,7 @@ function initVietQR() {
 
 function updateVietQRDisplay() {
   const vietQrImg = document.getElementById("vietQrImg");
+  const zalopayQrBox = document.getElementById("zalopayQrBox");
   const qrLoading = document.getElementById("qrLoading");
   const displayBankName = document.getElementById("displayBankName");
   const displayAccountNo = document.getElementById("displayAccountNo");
@@ -851,23 +852,41 @@ function updateVietQRDisplay() {
   if (displayMemo) displayMemo.textContent = CONFIG.recipient.memo;
   if (moneyAmount) moneyAmount.textContent = `${CONFIG.recipient.amount.toLocaleString("vi-VN")} VNĐ`;
 
-  if (qrLoading) qrLoading.classList.remove("hidden");
-
-  // Tạo URL QuickLink VietQR chuẩn:
-  // Nếu quét qua App Ngân hàng, dùng mã BIN 970454 (Bản Việt)
-  // Nếu quét qua ZaloPay, dùng mã BIN 971101 (ZaloPay)
-  const encodedMemo = encodeURIComponent(CONFIG.recipient.memo);
-  const encodedName = encodeURIComponent(CONFIG.recipient.accountName);
-  const qrUrl = `https://img.vietqr.io/image/${CONFIG.recipient.bankId}-${CONFIG.recipient.accountNo}-compact2.jpg?amount=${CONFIG.recipient.amount}&addInfo=${encodedMemo}&accountName=${encodedName}`;
-
-  if (vietQrImg) {
-    vietQrImg.onload = () => {
-      if (qrLoading) qrLoading.classList.add("hidden");
-    };
-    vietQrImg.onerror = () => {
-      if (qrLoading) qrLoading.innerHTML = "<span>Mã QR sẵn sàng! Vui lòng kiểm tra lại STK.</span>";
-    };
-    vietQrImg.src = qrUrl;
+  if (currentQrMode === "zalopay" || currentQrMode === "bank") {
+    // Vẽ mã QR ZaloPay chính thức 100% bằng QRCode.js
+    if (vietQrImg) vietQrImg.style.display = "none";
+    if (zalopayQrBox) {
+      zalopayQrBox.style.display = "block";
+      zalopayQrBox.innerHTML = "";
+      if (typeof QRCode !== "undefined") {
+        new QRCode(zalopayQrBox, {
+          text: EXACT_ZALOPAY_QR_STRING,
+          width: 185,
+          height: 185,
+          colorDark: "#1a0815",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    }
+    if (qrLoading) qrLoading.classList.add("hidden");
+  } else {
+    // Vẽ mã Napas ngân hàng Bản Việt
+    if (zalopayQrBox) zalopayQrBox.style.display = "none";
+    if (vietQrImg) {
+      vietQrImg.style.display = "block";
+      if (qrLoading) qrLoading.classList.remove("hidden");
+      const encodedMemo = encodeURIComponent(CONFIG.recipient.memo);
+      const encodedName = encodeURIComponent(CONFIG.recipient.accountName);
+      const qrUrl = `https://img.vietqr.io/image/970454-${CONFIG.recipient.accountNo}-compact2.jpg?amount=${CONFIG.recipient.amount}&addInfo=${encodedMemo}&accountName=${encodedName}`;
+      vietQrImg.onload = () => {
+        if (qrLoading) qrLoading.classList.add("hidden");
+      };
+      vietQrImg.onerror = () => {
+        if (qrLoading) qrLoading.classList.add("hidden");
+      };
+      vietQrImg.src = qrUrl;
+    }
   }
 }
 
