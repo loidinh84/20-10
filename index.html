@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Chúc Mừng 20/10 - Món Quà Bất Ngờ Dành Riêng Cho Em ❤️</title>
+  <meta name="description" content="Trang web chúc mừng ngày Phụ nữ Việt Nam 20/10 với thử thách tình yêu nhận lì xì bí mật.">
+
+  <!-- Google Fonts: Sang trọng, bay bổng và lãng mạn -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Canvas Confetti & QRCode.js -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Hiệu ứng cánh hoa rơi nền Canvas -->
+  <canvas id="petalCanvas"></canvas>
+
+  <!-- Nút điều khiển âm thanh & Nút lấy mã QR web cho bạn trai -->
+  <div class="top-controls">
+    <button id="btnMusic" class="control-btn" title="Bật/Tắt nhạc tình yêu">
+      <i class="fa-solid fa-compact-disc spin-record"></i>
+      <span class="music-tooltip">Nhạc 20/10</span>
+    </button>
+    <button id="btnShareQR" class="control-btn" title="Lấy mã QR gửi cho người yêu">
+      <i class="fa-solid fa-qrcode"></i>
+      <span class="music-tooltip">Mã QR Web</span>
+    </button>
+  </div>
+
+  <div class="main-container">
+
+    <!-- ==================== GIAI ĐOẠN 1: MỞ PHONG THƯ TÌNH YÊU ==================== -->
+    <section id="stepIntro" class="screen-section active">
+      <div class="glass-card intro-card">
+        <div class="badge-tag">
+          <i class="fa-solid fa-heart beat-icon"></i> 20 Tháng 10 - Ngày Của Em
+        </div>
+        
+        <h1 class="main-title">Gửi Em Bé Của Anh 💕</h1>
+        <p class="subtitle">Anh có một bức mật thư đặc biệt và một phần quà bí mật chuẩn bị riêng cho em hôm nay...</p>
+
+        <!-- Phong thư 3D tương tác -->
+        <div class="envelope-wrapper" id="envelopeWrapper">
+          <div class="envelope">
+            <div class="envelope-flap"></div>
+            <div class="envelope-pocket"></div>
+            <div class="envelope-letter">
+              <i class="fa-solid fa-heart-circle-check"></i>
+              <span>Happy 20/10</span>
+            </div>
+            <div class="heart-seal">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+          </div>
+        </div>
+
+        <p class="envelope-hint"><i class="fa-solid fa-arrow-up-long"></i> Chạm vào phong thư để mở nhé!</p>
+
+        <div class="counter-box" id="counterBox">
+          <span class="counter-label">Chúng mình đã bên nhau:</span>
+          <div class="counter-numbers">
+            <div class="time-item"><span id="daysCount">--</span><label>Ngày</label></div>
+            <div class="time-item"><span id="hoursCount">--</span><label>Giờ</label></div>
+            <div class="time-item"><span id="minutesCount">--</span><label>Phút</label></div>
+            <div class="time-item"><span id="secondsCount">--</span><label>Giây</label></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== GIAI ĐOẠN 2: THƯ TÌNH & THỬ THÁCH ==================== -->
+    <section id="stepLetter" class="screen-section">
+      <div class="glass-card letter-card">
+        <div class="card-header">
+          <div class="rose-icon"><i class="fa-solid fa-spa"></i></div>
+          <h2>Bức Thư Gửi Công Chúa 👑</h2>
+        </div>
+
+        <div class="letter-body">
+          <p class="typing-text" id="sweetMessage">
+            "Chúc mừng ngày 20/10 - ngày của người con gái dịu dàng, đáng yêu và tuyệt vời nhất trong lòng anh. 
+            Cảm ơn em đã đến bên anh, mang lại cho anh vô vàn nụ cười và sự ấm áp. 
+            Hôm nay, anh không chỉ có những lời chúc ngọt ngào mà còn có một món quà lì xì đặc biệt..."
+          </p>
+          <div class="notice-quest">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Để mở khoá <b>Bao Lì Xì 20/10</b>, em phải vượt qua 3 thử thách tình yêu dưới đây nhé!</span>
+          </div>
+        </div>
+
+        <button id="btnStartQuest" class="primary-btn glow-effect">
+          <span>Bắt Đầu Thử Thách Ngay</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== GIAI ĐOẠN 3: MINIGAME THỬ THÁCH ==================== -->
+    <section id="stepQuest" class="screen-section">
+      <div class="glass-card quest-card">
+        <div class="quest-progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="quest-step-indicator" id="questIndicator">Thử thách 1 / 3</div>
+
+        <!-- Vòng 1: Câu đố trắc nghiệm tình yêu -->
+        <div class="quest-panel active" id="quest1">
+          <div class="quest-icon"><i class="fa-solid fa-crown"></i></div>
+          <h3 class="quest-question">Ai là người đáng yêu, xinh đẹp và được cưng chiều nhất vũ trụ này?</h3>
+          <div class="options-grid">
+            <button class="opt-btn correct-opt" data-feedback="Chính xác 100%! Em là công chúa duy nhất của anh!">
+              <i class="fa-solid fa-star"></i> Em bé của anh chứ ai
+            </button>
+            <button class="opt-btn correct-opt" data-feedback="Chuẩn không cần chỉnh! Cả thế giới này em đáng yêu nhất!">
+              <i class="fa-solid fa-heart"></i> Là em - người nhận món quà này
+            </button>
+            <button class="opt-btn correct-opt" data-feedback="Dĩ nhiên rồi, luôn luôn là em!">
+              <i class="fa-solid fa-gem"></i> Tất cả các đáp án đều là em
+            </button>
+            <!-- Nút troll vui nhộn: chạy trốn khi rê chuột hoặc chạm vào -->
+            <button class="opt-btn runaway-btn" id="runawayBtn">
+              <i class="fa-solid fa-cat"></i> Con mèo hàng xóm 🐱
+            </button>
+          </div>
+        </div>
+
+        <!-- Vòng 2: Câu hỏi thấu hiểu & nịnh người yêu -->
+        <div class="quest-panel" id="quest2">
+          <div class="quest-icon"><i class="fa-solid fa-utensils"></i></div>
+          <h3 class="quest-question">Khi em nói "Em ăn gì cũng được", nhiệm vụ chuẩn của bạn trai là gì?</h3>
+          <div class="options-grid">
+            <button class="opt-btn wrong-opt" data-feedback="Sai rồi nha! Nói thế là giận tím người liền đó 😆">
+              A. Mua đại ổ bánh mì khô khốc
+            </button>
+            <button class="opt-btn correct-opt" data-feedback="Quá chuẩn! Bạn trai 10 điểm không có nhưng!">
+              B. Đưa đi ăn món em thích nhất + gọi trà sữa full topping
+            </button>
+            <button class="opt-btn wrong-opt" data-feedback="Nguy hiểm! Tuyệt đối không được hỏi lại 10 lần nhé!">
+              C. Đứng hỏi đi hỏi lại: 'Thế rốt cuộc là ăn gì?'
+            </button>
+          </div>
+        </div>
+
+        <!-- Vòng 3: Vòng quay / Hộp quà may mắn chọn mức độ yêu -->
+        <div class="quest-panel" id="quest3">
+          <div class="quest-icon"><i class="fa-solid fa-gift"></i></div>
+          <h3 class="quest-question">Hãy chọn 1 hộp quà may mắn để mở phong bao lì xì 20/10 của em!</h3>
+          <p class="quest-subtext">Hộp quà nào cũng chứa đựng tình yêu to bự và phần quà ting ting!</p>
+          <div class="gift-boxes-container">
+            <div class="gift-box-item" data-box="1">
+              <div class="gift-box-inner">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Hộp Số 1</span>
+              </div>
+            </div>
+            <div class="gift-box-item" data-box="2">
+              <div class="gift-box-inner">
+                <i class="fa-solid fa-gift"></i>
+                <span>Hộp Số 2</span>
+              </div>
+            </div>
+            <div class="gift-box-item" data-box="3">
+              <div class="gift-box-inner">
+                <i class="fa-solid fa-heart"></i>
+                <span>Hộp Số 3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thông báo tương tác tức thời -->
+        <div class="toast-feedback" id="toastFeedback"></div>
+      </div>
+    </section>
+
+    <!-- ==================== GIAI ĐOẠN 4: NHẬN TIỀN & MÃ VIETQR ==================== -->
+    <section id="stepReward" class="screen-section">
+      <div class="glass-card reward-card">
+        <div class="congrats-header">
+          <div class="trophy-badge"><i class="fa-solid fa-trophy"></i></div>
+          <h2 class="reward-title">CHÚC MỪNG EM YÊU! 🎉</h2>
+          <p class="reward-desc">Em đã xuất sắc vượt qua toàn bộ thử thách tình yêu của anh!</p>
+        </div>
+
+        <!-- Phong bao Lì Xì 20/10 mở ra -->
+        <div class="red-envelope-card">
+          <div class="envelope-top-badge">
+            <i class="fa-solid fa-coins"></i> PHẦN THƯỞNG 20/10
+          </div>
+          <div class="money-display" id="moneyAmount">201,020 VNĐ</div>
+          <p class="money-meaning" id="moneyMeaning">
+            <i class="fa-solid fa-heart"></i> Tượng trưng cho ngày 20/10 đặc biệt của chúng mình
+          </p>
+
+          <!-- Khu vực hiển thị mã VietQR nhận tiền -->
+          <div class="qr-payment-section">
+            <div class="qr-frame">
+              <img id="vietQrImg" src="" alt="Mã VietQR Chuyển Tiền Lì Xì 20/10" class="qr-image">
+              <div class="qr-loading" id="qrLoading">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <span>Đang tạo mã VietQR...</span>
+              </div>
+            </div>
+
+            <div class="payment-info-box">
+              <div class="info-row">
+                <span class="info-label">Ngân hàng:</span>
+                <span class="info-value" id="displayBankName">MB Bank</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Số tài khoản:</span>
+                <span class="info-value copyable" id="displayAccountNo" title="Bấm để sao chép">0987654321 <i class="fa-regular fa-copy"></i></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Người nhận:</span>
+                <span class="info-value" id="displayAccountName">CONG CHUA NHO</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Nội dung CK:</span>
+                <span class="info-value highlight" id="displayMemo">Chuc mung 20-10 em yeu</span>
+              </div>
+            </div>
+
+            <!-- Nút tuỳ chỉnh nhanh nếu bạn gái muốn nhập STK của riêng mình -->
+            <button class="text-link-btn" id="btnCustomAccount">
+              <i class="fa-solid fa-pen-to-square"></i> Muốn đổi sang số tài khoản khác? Bấm vào đây
+            </button>
+
+            <!-- Form đổi STK linh hoạt -->
+            <div class="custom-bank-form" id="customBankForm">
+              <h4>Nhập tài khoản để nhận tiền ting ting:</h4>
+              <div class="input-group">
+                <label for="bankSelect">Ngân hàng:</label>
+                <select id="bankSelect" class="form-control">
+                  <option value="MB">MBBank (Ngân hàng Quân Đội)</option>
+                  <option value="VCB">Vietcombank</option>
+                  <option value="TCB">Techcombank</option>
+                  <option value="ACB">ACB (Á Châu)</option>
+                  <option value="VPB">VPBank</option>
+                  <option value="TPB">TPBank (Tiên Phong)</option>
+                  <option value="BIDV">BIDV</option>
+                  <option value="CTG">VietinBank</option>
+                  <option value="OCB">OCB</option>
+                  <option value="VIB">VIB</option>
+                  <option value="TIMO">Timo</option>
+                  <option value="CAKE">Cake by VPBank</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="accountInput">Số tài khoản / SĐT:</label>
+                <input type="text" id="accountInput" class="form-control" placeholder="Nhập số tài khoản của em...">
+              </div>
+              <div class="input-group">
+                <label for="nameInput">Tên người nhận (không dấu):</label>
+                <input type="text" id="nameInput" class="form-control" placeholder="VD: NGUYEN THI B" value="EM BE DANG YEU">
+              </div>
+              <button id="btnGenerateCustomQR" class="primary-btn small-btn">
+                <i class="fa-solid fa-qrcode"></i> Cập Nhật Mã QR Ngay
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Các nút hành động gửi tin nhắn / khoe bạn trai -->
+        <div class="action-buttons-group">
+          <button id="btnClaimZalo" class="share-btn zalo-btn">
+            <i class="fa-solid fa-paper-plane"></i> Gửi thông báo 'Đòi ting ting' cho Anh yêu
+          </button>
+          <button id="btnReplay" class="secondary-btn">
+            <i class="fa-solid fa-rotate-right"></i> Xem lại từ đầu
+          </button>
+        </div>
+
+        <div class="final-wish">
+          ❤️ Chúc em mãi luôn xinh đẹp, hạnh phúc và luôn là cô gái tuyệt vời nhất của anh! ❤️
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ==================== MODAL: LẤY MÃ QR CỦA TRANG WEB CHO BẠN TRAI ==================== -->
+  <div class="modal-backdrop" id="qrShareModal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btnCloseModal">&times;</button>
+      <div class="modal-icon"><i class="fa-solid fa-qrcode"></i></div>
+      <h3 class="modal-title">Mã QR Truy Cập Website</h3>
+      <p class="modal-desc">In mã QR này lên thiệp mừng hoặc gửi ảnh cho bạn gái quét bằng camera điện thoại nhé!</p>
+
+      <div class="web-qr-container">
+        <div id="websiteQrBox"></div>
+      </div>
+
+      <div class="url-input-box">
+        <input type="text" id="webUrlInput" readonly class="form-control">
+        <button id="btnCopyUrl" class="primary-btn small-btn">
+          <i class="fa-regular fa-copy"></i> Chép Link
+        </button>
+      </div>
+
+      <p class="modal-hint">
+        💡 <i>Mẹo: Sau khi bạn đưa web lên Vercel / Netlify / Render, link web sẽ tự động xuất hiện ở đây để bạn gái ở xa có thể quét!</i>
+      </p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
