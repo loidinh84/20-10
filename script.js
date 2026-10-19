@@ -1,35 +1,37 @@
 /**
  * ==========================================================
- * CẤU HÌNH THÔNG TIN 20/10 (BẠN CÓ THỂ CHỈNH SỬA Ở ĐÂY)
+ * CẤU HÌNH THÔNG TIN 20/10 - YÊU PHẠM THỊ BÍCH TRÂM
  * ==========================================================
  */
 const CONFIG = {
-  // Ngày bắt đầu yêu nhau (Định dạng: YYYY-MM-DD hoặc YYYY-MM-DDTHH:mm:ss)
-  // Bạn có thể đổi lại ngày chính xác của 2 bạn nhé:
+  // Ngày bắt đầu yêu nhau (Định dạng: YYYY-MM-DD)
   startDate: "2026-08-30",
 
-  // Thông tin nhận lì xì 20/10 mặc định:
+  // Thông tin nhận lì xì mặc định (Ngân hàng TMCP Bản Việt - BVBank / ZaloPay):
+  // Dùng mã BIN 970454 chuẩn Napas247 để TẤT CẢ app ngân hàng (VCB, MB, TCB...) đều quét được ngay!
   recipient: {
-    bankId: "ZALOPAY",
-    bankName: "ZaloPay",
-    accountNo: "99ZP26286M80195808",
-    accountName: "ZALOPAY_PHAM THI BICH TRAM",
-    amount: 50000,
-    memo: "Chuc mung 20-10 em yeu",
+    bankId: "970454",                              // Mã Napas BVBank (Bản Việt)
+    bankName: "Ngân hàng TMCP Bản Việt (BVBank)", // Tên ngân hàng
+    accountNo: "99ZP26286M80195808",              // Số tài khoản của Bích Trâm
+    accountName: "PHAM THI BICH TRAM",            // Tên chủ tài khoản
+    amount: 50000,                                 // Số tiền lì xì: 50.000đ
+    memo: "Chuc mung 20-10 em yeu"                // Nội dung chuyển khoản
   },
 
-  // Link nhạc nền tình yêu lãng mạn (mp3 trực tuyến nhẹ nhàng)
-  bgmUrl: "https://youtu.be/2B8y347pwCg?si=Dbg8QwKEV0wGbWNc",
+  // Link bài hát: "Ngày Còn Đôi Mươi - Tiểu Mỹ"
+  bgmUrl: "https://youtu.be/2B8y347pwCg?si=Dbg8QwKEV0wGbWNc"
 };
 
 // ==========================================================
-// TRẠNG THÁI ỨNG DỤNG & CÁC PHẦN TỬ DOM
+// TRẠNG THÁI TOÀN CỤC CỦA ỨNG DỤNG
 // ==========================================================
 let currentQuest = 1;
 const totalQuests = 3;
-let audioContext = null;
 let isMusicPlaying = false;
 let bgMusicAudio = null;
+let ytPlayer = null;
+let ytReady = false;
+let currentQrMode = "bank"; // "bank" (BVBank Napas) hoặc "zalopay"
 
 document.addEventListener("DOMContentLoaded", () => {
   initPetalAnimation();
@@ -38,6 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initEnvelopeInteraction();
   initQuestFlow();
   initRunawayButton();
+  initLoveCatcherGame();
+  initLuckyWheel();
   initVietQR();
   initShareModal();
 });
@@ -58,7 +62,7 @@ function initPetalAnimation() {
     height = canvas.height = window.innerHeight;
   });
 
-  const petalsCount = Math.min(35, Math.floor(width / 20));
+  const petalsCount = Math.min(28, Math.floor(width / 22));
   const petals = [];
 
   class Petal {
@@ -69,18 +73,18 @@ function initPetalAnimation() {
     reset(initial = false) {
       this.x = Math.random() * width;
       this.y = initial ? Math.random() * height : -20;
-      this.size = Math.random() * 12 + 10;
-      this.speedY = Math.random() * 1.5 + 0.8;
-      this.speedX = Math.sin(Math.random() * Math.PI) * 1.2;
+      this.size = Math.random() * 10 + 9;
+      this.speedY = Math.random() * 1.2 + 0.6;
+      this.speedX = Math.sin(Math.random() * Math.PI) * 1.0;
       this.angle = Math.random() * 360;
-      this.spinSpeed = (Math.random() - 0.5) * 1.8;
-      this.opacity = Math.random() * 0.5 + 0.4;
+      this.spinSpeed = (Math.random() - 0.5) * 1.5;
+      this.opacity = Math.random() * 0.4 + 0.35;
       this.color = Math.random() > 0.4 ? "#ff4d79" : "#ff80a6";
     }
 
     update() {
       this.y += this.speedY;
-      this.x += Math.sin(this.y * 0.015) + this.speedX * 0.3;
+      this.x += Math.sin(this.y * 0.015) + this.speedX * 0.25;
       this.angle += this.spinSpeed;
 
       if (this.y > height + 20 || this.x < -20 || this.x > width + 20) {
@@ -97,22 +101,8 @@ function initPetalAnimation() {
 
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.bezierCurveTo(
-        -this.size / 2,
-        -this.size / 2,
-        -this.size,
-        this.size / 3,
-        0,
-        this.size,
-      );
-      ctx.bezierCurveTo(
-        this.size,
-        this.size / 3,
-        this.size / 2,
-        -this.size / 2,
-        0,
-        0,
-      );
+      ctx.bezierCurveTo(-this.size / 2, -this.size / 2, -this.size, this.size / 3, 0, this.size);
+      ctx.bezierCurveTo(this.size, this.size / 3, this.size / 2, -this.size / 2, 0, 0);
       ctx.fill();
 
       ctx.restore();
@@ -135,66 +125,7 @@ function initPetalAnimation() {
 }
 
 // ==========================================================
-// 2. ĐẾM NGÀY YÊU NHAU (LOVE COUNTDOWN)
-// ==========================================================
-// Trích xuất YouTube Video ID từ link (nếu là link YouTube)
-function extractYouTubeId(url) {
-  if (!url) return null;
-  const match = url.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/,
-  );
-  return match ? match[1] : null;
-}
-
-let ytPlayer = null;
-let ytReady = false;
-
-window.onYouTubeIframeAPIReady = function () {
-  const ytId = extractYouTubeId(CONFIG.bgmUrl);
-  if (!ytId) return;
-
-  try {
-    ytPlayer = new YT.Player("ytPlayerContainer", {
-      height: "1",
-      width: "1",
-      videoId: ytId,
-      playerVars: {
-        autoplay: 0,
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        loop: 1,
-        playlist: ytId,
-        playsinline: 1,
-        modestbranding: 1,
-      },
-      events: {
-        onReady: (event) => {
-          ytReady = true;
-          event.target.setVolume(70);
-        },
-        onStateChange: (event) => {
-          const icon = document.querySelector("#btnMusic .spin-record");
-          if (event.data === YT.PlayerState.PLAYING) {
-            isMusicPlaying = true;
-            icon?.classList.remove("paused");
-          } else if (event.data === YT.PlayerState.PAUSED) {
-            isMusicPlaying = false;
-            icon?.classList.add("paused");
-          } else if (event.data === YT.PlayerState.ENDED) {
-            ytPlayer.seekTo(0);
-            ytPlayer.playVideo();
-          }
-        },
-      },
-    });
-  } catch (err) {
-    console.warn("YouTube Player error:", err);
-  }
-};
-
-// ==========================================================
-// 2. ĐẾM NGÀY YÊU NHAU (LOVE COUNTDOWN)
+// 2. ĐẾM THỜI GIAN BÊN NHAU (LOVE COUNTDOWN)
 // ==========================================================
 function initCountdownTimer() {
   const daysEl = document.getElementById("daysCount");
@@ -203,9 +134,7 @@ function initCountdownTimer() {
   const secondsEl = document.getElementById("secondsCount");
 
   const dateStr = CONFIG.startDate;
-  const start = (
-    dateStr.includes("T") ? new Date(dateStr) : new Date(`${dateStr}T00:00:00`)
-  ).getTime();
+  const start = (dateStr.includes("T") ? new Date(dateStr) : new Date(`${dateStr}T00:00:00`)).getTime();
 
   function update() {
     const now = new Date().getTime();
@@ -227,14 +156,64 @@ function initCountdownTimer() {
 }
 
 // ==========================================================
-// 3. ÂM THANH & HIỆU ỨNG TƯƠNG TÁC
+// 3. ÂM THANH & YOUTUBE PLAYER ("Ngày Còn Đôi Mươi")
 // ==========================================================
+function extractYouTubeId(url) {
+  if (!url) return null;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  return match ? match[1] : null;
+}
+
+window.onYouTubeIframeAPIReady = function () {
+  const ytId = extractYouTubeId(CONFIG.bgmUrl);
+  if (!ytId) return;
+
+  try {
+    ytPlayer = new YT.Player("ytPlayerContainer", {
+      height: "1",
+      width: "1",
+      videoId: ytId,
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        loop: 1,
+        playlist: ytId,
+        playsinline: 1,
+        modestbranding: 1
+      },
+      events: {
+        onReady: (event) => {
+          ytReady = true;
+          event.target.setVolume(75);
+        },
+        onStateChange: (event) => {
+          const icon = document.querySelector("#btnMusic .spin-record");
+          if (event.data === YT.PlayerState.PLAYING) {
+            isMusicPlaying = true;
+            icon?.classList.remove("paused");
+          } else if (event.data === YT.PlayerState.PAUSED) {
+            isMusicPlaying = false;
+            icon?.classList.add("paused");
+          } else if (event.data === YT.PlayerState.ENDED) {
+            ytPlayer.seekTo(0);
+            ytPlayer.playVideo();
+          }
+        }
+      }
+    });
+  } catch (err) {
+    console.warn("YouTube Player error:", err);
+  }
+};
+
 function initAudio() {
   const btnMusic = document.getElementById("btnMusic");
   const icon = btnMusic ? btnMusic.querySelector(".spin-record") : null;
   const ytId = extractYouTubeId(CONFIG.bgmUrl);
 
-  // Sử dụng Web Audio API để phát âm thanh chuông mừng vui tai
+  // Hiệu ứng âm thanh bằng Web Audio API
   window.playChimeSound = function (type = "success") {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -246,14 +225,21 @@ function initAudio() {
 
       if (type === "success") {
         osc.type = "sine";
-        osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // A5
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
         osc.start();
-        osc.stop(ctx.currentTime + 0.5);
+        osc.stop(ctx.currentTime + 0.4);
+      } else if (type === "pop") {
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.2);
       } else if (type === "win") {
-        // Hợp âm chiến thắng bùng nổ
         [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
           const o = ctx.createOscillator();
           const g = ctx.createGain();
@@ -266,17 +252,12 @@ function initAudio() {
           o.stop(ctx.currentTime + 0.8);
         });
       }
-    } catch (e) {
-      // Bỏ qua nếu trình duyệt chặn audio context
-    }
+    } catch (e) {}
   };
 
-  // Nếu không phải link YouTube thì dùng HTML5 Audio bình thường
   if (!ytId) {
     bgMusicAudio = new Audio();
-    bgMusicAudio.src =
-      CONFIG.bgmUrl ||
-      "https://cdn.pixabay.com/download/audio/2022/05/16/audio_c976939433.mp3?filename=romantic-love-story-112196.mp3";
+    bgMusicAudio.src = "https://cdn.pixabay.com/download/audio/2022/05/16/audio_c976939433.mp3?filename=romantic-love-story-112196.mp3";
     bgMusicAudio.loop = true;
     bgMusicAudio.volume = 0.5;
   }
@@ -299,15 +280,12 @@ function initAudio() {
         isMusicPlaying = false;
         icon?.classList.add("paused");
       } else {
-        bgMusicAudio
-          .play()
-          .then(() => {
-            isMusicPlaying = true;
-            icon?.classList.remove("paused");
-          })
-          .catch(() => {
-            showToast("Chạm vào màn hình để bắt đầu nghe nhạc nhé!");
-          });
+        bgMusicAudio.play().then(() => {
+          isMusicPlaying = true;
+          icon?.classList.remove("paused");
+        }).catch(() => {
+          showToast("Chạm vào màn hình để bắt đầu nghe bài hát nhé!");
+        });
       }
     }
   }
@@ -316,19 +294,15 @@ function initAudio() {
     btnMusic.addEventListener("click", toggleAudio);
   }
 
-  // Tự động phát nhạc khi chạm lần đầu trên điện thoại
   const startMusicOnFirstTouch = () => {
     if (!isMusicPlaying) {
       if (ytId && ytPlayer && typeof ytPlayer.playVideo === "function") {
         ytPlayer.playVideo();
       } else if (bgMusicAudio) {
-        bgMusicAudio
-          .play()
-          .then(() => {
-            isMusicPlaying = true;
-            icon?.classList.remove("paused");
-          })
-          .catch(() => {});
+        bgMusicAudio.play().then(() => {
+          isMusicPlaying = true;
+          icon?.classList.remove("paused");
+        }).catch(() => {});
       }
     }
     window.removeEventListener("click", startMusicOnFirstTouch);
@@ -354,12 +328,11 @@ function initEnvelopeInteraction() {
       envelope.classList.add("open");
       if (window.playChimeSound) window.playChimeSound("success");
 
-      // Bắn chút pháo hoa giấy nhỏ
       if (typeof confetti === "function") {
         confetti({
-          particleCount: 40,
+          particleCount: 35,
           spread: 60,
-          origin: { y: 0.6 },
+          origin: { y: 0.6 }
         });
       }
 
@@ -386,12 +359,12 @@ function switchScreen(fromEl, toEl) {
         toEl.style.display = "block";
         setTimeout(() => toEl.classList.add("active"), 30);
       }
-    }, 400);
+    }, 380);
   }
 }
 
 // ==========================================================
-// 5. NÚT TROLL CHẠY TRỐN (KHI CHỌN ĐÁP ÁN SAI)
+// 5. NÚT TROLL CHẠY TRỐN (VÒNG 1)
 // ==========================================================
 function initRunawayButton() {
   const runawayBtn = document.getElementById("runawayBtn");
@@ -403,7 +376,7 @@ function initRunawayButton() {
     const rect = container.getBoundingClientRect();
 
     const maxX = rect.width - runawayBtn.offsetWidth - 20;
-    const maxY = 180;
+    const maxY = 170;
 
     const randomX = Math.max(10, Math.floor(Math.random() * maxX));
     const randomY = Math.max(10, Math.floor(Math.random() * maxY));
@@ -413,7 +386,7 @@ function initRunawayButton() {
     runawayBtn.style.top = `${randomY}px`;
     runawayBtn.style.zIndex = "10";
 
-    showToast("Ối dồi ôi! Nút này biết chạy trốn rồi, đừng bấm nha 😜");
+    showToast("Ối! Nút này biết chạy trốn rồi, Bích Trâm đừng bấm nha 😜");
   }
 
   runawayBtn.addEventListener("mouseover", moveButton);
@@ -422,15 +395,13 @@ function initRunawayButton() {
 }
 
 // ==========================================================
-// 6. TIẾN TRÌNH MINIGAME THỬ THÁCH (STAGE 3)
+// 6. TIẾN TRÌNH CHUYỂN VÒNG THỬ THÁCH
 // ==========================================================
 function initQuestFlow() {
   const stepQuest = document.getElementById("stepQuest");
   const stepReward = document.getElementById("stepReward");
-  const progressFill = document.getElementById("progressFill");
-  const questIndicator = document.getElementById("questIndicator");
 
-  // Vòng 1 & 2: Chọn đáp án đúng
+  // Vòng 1: Chọn đáp án đúng
   const correctButtons = document.querySelectorAll(".correct-opt");
   correctButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -438,62 +409,13 @@ function initQuestFlow() {
       showToast(feedback);
       if (window.playChimeSound) window.playChimeSound("success");
 
-      // Chuyển sang câu hỏi kế tiếp
-      nextQuest();
-    });
-  });
-
-  const wrongButtons = document.querySelectorAll(".wrong-opt");
-  wrongButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const feedback = btn.getAttribute("data-feedback") || "Sai rồi nha!";
-      showToast(feedback);
-      btn.style.transform = "translateX(6px)";
-      setTimeout(() => (btn.style.transform = "translateX(-6px)"), 100);
-      setTimeout(() => (btn.style.transform = "translateX(0)"), 200);
-    });
-  });
-
-  // Vòng 3: Mở hộp quà bí mật
-  const giftBoxes = document.querySelectorAll(".gift-box-item");
-  giftBoxes.forEach((box) => {
-    box.addEventListener("click", () => {
-      box.style.transform = "scale(1.2) rotate(8deg)";
-      if (window.playChimeSound) window.playChimeSound("win");
-
-      // Bắn pháo hoa rực rỡ ăn mừng!
-      launchVictoryConfetti();
-
-      showToast("🎁 Bùm! Chúc mừng em đã nhận được Bao Lì Xì 20/10!");
-
+      // Chuyển sang Vòng 2 (Mini-game Bắt Trái Tim)
       setTimeout(() => {
-        switchScreen(stepQuest, stepReward);
-        updateVietQRDisplay();
-      }, 1200);
+        nextQuest();
+      }, 500);
     });
   });
 
-  function nextQuest() {
-    const currentPanel = document.getElementById(`quest${currentQuest}`);
-    currentQuest++;
-
-    if (currentQuest <= totalQuests) {
-      const nextPanel = document.getElementById(`quest${currentQuest}`);
-      if (progressFill) {
-        progressFill.style.width = `${(currentQuest / totalQuests) * 100}%`;
-      }
-      if (questIndicator) {
-        questIndicator.textContent = `Thử thách ${currentQuest} / ${totalQuests}`;
-      }
-
-      if (currentPanel) currentPanel.classList.remove("active");
-      setTimeout(() => {
-        if (nextPanel) nextPanel.classList.add("active");
-      }, 250);
-    }
-  }
-
-  // Nút xem lại từ đầu
   const btnReplay = document.getElementById("btnReplay");
   if (btnReplay) {
     btnReplay.addEventListener("click", () => {
@@ -502,10 +424,307 @@ function initQuestFlow() {
   }
 }
 
-// Bắn pháo hoa hoành tráng khi chiến thắng
+function nextQuest() {
+  const progressFill = document.getElementById("progressFill");
+  const questIndicator = document.getElementById("questIndicator");
+  const currentPanel = document.getElementById(`quest${currentQuest}`);
+  currentQuest++;
+
+  const titles = [
+    "Thử thách 1 / 3: Câu đố tình yêu",
+    "Thử thách 2 / 3: Bắt trái tim yêu thương",
+    "Thử thách 3 / 3: Vòng quay may mắn 20/10"
+  ];
+
+  if (currentQuest <= totalQuests) {
+    const nextPanel = document.getElementById(`quest${currentQuest}`);
+    if (progressFill) {
+      progressFill.style.width = `${(currentQuest / totalQuests) * 100}%`;
+    }
+    if (questIndicator) {
+      questIndicator.textContent = titles[currentQuest - 1];
+    }
+
+    if (currentPanel) currentPanel.classList.remove("active");
+    setTimeout(() => {
+      if (nextPanel) nextPanel.classList.add("active");
+    }, 250);
+  }
+}
+
+// ==========================================================
+// 7. GAME 2: BẮT TRÁI TIM YÊU THƯƠNG (CANVAS INTERACTIVE)
+// ==========================================================
+function initLoveCatcherGame() {
+  const canvas = document.getElementById("catcherCanvas");
+  const overlay = document.getElementById("gameOverlay");
+  const btnStart = document.getElementById("btnStartCatcher");
+  const scoreEl = document.getElementById("catcherScore");
+  const timerEl = document.getElementById("catcherTimer");
+
+  if (!canvas || !btnStart) return;
+  const ctx = canvas.getContext("2d");
+
+  let gameRunning = false;
+  let score = 0;
+  const targetScore = 8;
+  let timeLeft = 25;
+  let timerInterval = null;
+  let animationFrameId = null;
+
+  // Giỏ hứng tim ở đáy
+  const basket = {
+    x: canvas.width / 2 - 32,
+    y: canvas.height - 35,
+    width: 64,
+    height: 24,
+    color: "#ff3366"
+  };
+
+  // Mảng các trái tim đang rơi
+  let fallingItems = [];
+
+  class FallingHeart {
+    constructor() {
+      this.reset();
+    }
+
+    reset() {
+      this.x = Math.random() * (canvas.width - 24) + 12;
+      this.y = -15;
+      this.speed = Math.random() * 1.5 + 1.2;
+      this.size = Math.random() * 6 + 14;
+      this.type = Math.random() > 0.25 ? "heart" : "rose";
+    }
+
+    update() {
+      this.y += this.speed;
+      if (this.y > canvas.height + 20) {
+        this.reset();
+      }
+    }
+
+    draw() {
+      ctx.font = `${this.size}px serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(this.type === "heart" ? "❤️" : "🌹", this.x, this.y);
+    }
+  }
+
+  function handleMove(clientX) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const canvasX = (clientX - rect.left) * scaleX;
+    basket.x = Math.max(0, Math.min(canvas.width - basket.width, canvasX - basket.width / 2));
+  }
+
+  // Sự kiện chạm di chuyển trên điện thoại & chuột trên máy tính
+  canvas.addEventListener("mousemove", (e) => {
+    if (gameRunning) handleMove(e.clientX);
+  });
+  canvas.addEventListener("touchmove", (e) => {
+    if (gameRunning && e.touches.length > 0) {
+      e.preventDefault();
+      handleMove(e.touches[0].clientX);
+    }
+  }, { passive: false });
+
+  btnStart.addEventListener("click", startGame);
+
+  function startGame() {
+    overlay.classList.add("hidden");
+    gameRunning = true;
+    score = 0;
+    timeLeft = 25;
+    if (scoreEl) scoreEl.textContent = score;
+    if (timerEl) timerEl.textContent = timeLeft;
+
+    fallingItems = [new FallingHeart(), new FallingHeart(), new FallingHeart()];
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      if (timerEl) timerEl.textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        endGame(false);
+      }
+    }, 1000);
+
+    gameLoop();
+  }
+
+  function gameLoop() {
+    if (!gameRunning) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Vẽ giỏ hứng tim xinh xắn
+    ctx.fillStyle = basket.color;
+    ctx.beginPath();
+    ctx.roundRect(basket.x, basket.y, basket.width, basket.height, [8, 8, 12, 12]);
+    ctx.fill();
+    ctx.strokeStyle = "#ffd700";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Nhãn giỏ
+    ctx.font = "bold 10px 'Montserrat'";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.fillText("YÊU TRÂM", basket.x + basket.width / 2, basket.y + 15);
+
+    // Cập nhật và kiểm tra va chạm
+    fallingItems.forEach((item) => {
+      item.update();
+      item.draw();
+
+      // Kiểm tra chạm vào giỏ
+      if (
+        item.y + item.size / 2 >= basket.y &&
+        item.y - item.size / 2 <= basket.y + basket.height &&
+        item.x >= basket.x - 5 &&
+        item.x <= basket.x + basket.width + 5
+      ) {
+        score++;
+        if (scoreEl) scoreEl.textContent = score;
+        if (window.playChimeSound) window.playChimeSound("pop");
+        item.reset();
+
+        // Hiệu ứng ăn mừng khi hứng đủ
+        if (score >= targetScore) {
+          endGame(true);
+        }
+      }
+    });
+
+    if (gameRunning) {
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  function endGame(isWin) {
+    gameRunning = false;
+    clearInterval(timerInterval);
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+    if (isWin) {
+      if (window.playChimeSound) window.playChimeSound("win");
+      if (typeof confetti === "function") {
+        confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+      }
+      showToast("🎉 Giỏi quá! Bích Trâm đã hứng trọn tình yêu của Anh!");
+
+      setTimeout(() => {
+        nextQuest(); // Sang Vòng 3 (Vòng quay may mắn)
+      }, 1000);
+    } else {
+      overlay.classList.remove("hidden");
+      btnStart.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Thử lại nhé Bích Trâm`;
+      showToast("Hết giờ mất rồi, thử lại một xíu là qua ngay nè!");
+    }
+  }
+}
+
+// ==========================================================
+// 8. GAME 3: VÒNG QUAY MAY MẮN (LUCKY WHEEL)
+// ==========================================================
+function initLuckyWheel() {
+  const canvas = document.getElementById("wheelCanvas");
+  const btnSpin = document.getElementById("btnSpinWheel");
+  const wheelHint = document.getElementById("wheelHint");
+  const stepQuest = document.getElementById("stepQuest");
+  const stepReward = document.getElementById("stepReward");
+
+  if (!canvas || !btnSpin) return;
+  const ctx = canvas.getContext("2d");
+
+  const segments = [
+    { text: "Lì xì 50k 20/10", color: "#d61849", icon: "🧧" },
+    { text: "Cưng chiều 1 năm", color: "#3d1028", icon: "👑" },
+    { text: "Bao ăn món thích", color: "#8a1036", icon: "🍲" },
+    { text: "Phiếu hết giận", color: "#29081e", icon: "📜" },
+    { text: "Hẹn hò lãng mạn", color: "#b51442", icon: "🎬" },
+    { text: "Yêu Trâm suốt đời", color: "#4f0e31", icon: "💖" }
+  ];
+
+  const totalSegments = segments.length;
+  const arc = (2 * Math.PI) / totalSegments;
+  const center = canvas.width / 2;
+  const radius = center - 8;
+
+  let currentRotation = 0;
+  let isSpinning = false;
+
+  function drawWheel() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < totalSegments; i++) {
+      const angle = i * arc;
+      ctx.beginPath();
+      ctx.fillStyle = segments[i].color;
+      ctx.moveTo(center, center);
+      ctx.arc(center, center, radius, angle, angle + arc);
+      ctx.lineTo(center, center);
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255, 215, 0, 0.5)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Vẽ chữ và icon
+      ctx.save();
+      ctx.translate(center, center);
+      ctx.rotate(angle + arc / 2);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px 'Montserrat'";
+      ctx.fillText(`${segments[i].icon} ${segments[i].text}`, radius - 15, 4);
+      ctx.restore();
+    }
+
+    // Viền kim loại vàng gold ngoài cùng
+    ctx.beginPath();
+    ctx.arc(center, center, radius, 0, 2 * Math.PI);
+    ctx.strokeStyle = "#ffd700";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  }
+
+  drawWheel();
+
+  btnSpin.addEventListener("click", () => {
+    if (isSpinning) return;
+    isSpinning = true;
+    if (wheelHint) wheelHint.textContent = "Vòng quay đang xoay vèo vèo... Hồi hộp quá!";
+
+    // Tính toán góc quay để kim dừng trúng ngay ô "Lì xì 50k 20/10" (Ô số 0)
+    // Kim ở đỉnh (270 độ = 1.5 * PI)
+    const extraRotations = 5 * 360; // 5 vòng quay
+    // Ô 0 trải dài từ 0 đến 60 độ. Để kim ở đỉnh chỉ vào ô 0:
+    const targetAngle = extraRotations + (270 - 30); 
+
+    canvas.style.transform = `rotate(${targetAngle}deg)`;
+
+    // Sau khi quay xong (4.5s)
+    setTimeout(() => {
+      isSpinning = false;
+      if (window.playChimeSound) window.playChimeSound("win");
+      launchVictoryConfetti();
+
+      showToast("🎁 TRÚNG RỒI! Phần thưởng: Lì Xì 50.000đ + Tình Yêu Của Anh!");
+
+      setTimeout(() => {
+        switchScreen(stepQuest, stepReward);
+        updateVietQRDisplay();
+      }, 1500);
+    }, 4600);
+  });
+}
+
 function launchVictoryConfetti() {
   if (typeof confetti !== "function") return;
-
   const duration = 3.5 * 1000;
   const animationEnd = Date.now() + duration;
   const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 999 };
@@ -516,61 +735,68 @@ function launchVictoryConfetti() {
 
   const interval = setInterval(function () {
     const timeLeft = animationEnd - Date.now();
+    if (timeLeft <= 0) return clearInterval(interval);
 
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
-    }
-
-    const particleCount = 50 * (timeLeft / duration);
-    confetti(
-      Object.assign({}, defaults, {
-        particleCount,
-        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-      }),
-    );
-    confetti(
-      Object.assign({}, defaults, {
-        particleCount,
-        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-      }),
-    );
+    const particleCount = 45 * (timeLeft / duration);
+    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
   }, 250);
 }
 
 // ==========================================================
-// 7. TỰ ĐỘNG TẠO MÃ VIETQR CHUẨN NAPAS247
+// 9. MÃ VIETQR CHUẨN NAPAS247 (QUÉT ĐƯỢC 100%)
 // ==========================================================
 function initVietQR() {
-  const vietQrImg = document.getElementById("vietQrImg");
-  const qrLoading = document.getElementById("qrLoading");
+  const tabBankQR = document.getElementById("tabBankQR");
+  const tabZaloQR = document.getElementById("tabZaloQR");
+  const qrScanGuide = document.getElementById("qrScanGuide");
   const btnCustomAccount = document.getElementById("btnCustomAccount");
   const customBankForm = document.getElementById("customBankForm");
   const btnGenerateCustomQR = document.getElementById("btnGenerateCustomQR");
 
-  // Nút sao chép STK
+  // Tab chuyển đổi quét bằng Ngân Hàng hoặc ZaloPay
+  if (tabBankQR && tabZaloQR) {
+    tabBankQR.addEventListener("click", () => {
+      tabBankQR.classList.add("active");
+      tabZaloQR.classList.remove("active");
+      currentQrMode = "bank";
+      CONFIG.recipient.bankId = "970454"; // BIN Bản Việt
+      CONFIG.recipient.bankName = "Ngân hàng TMCP Bản Việt (BVBank)";
+      if (qrScanGuide) qrScanGuide.innerHTML = "✨ <i>Dùng bất kỳ App Ngân hàng nào (VCB, MB, Techcombank, VPBank...) quét mã trên để nhận tiền ngay nhé!</i>";
+      updateVietQRDisplay();
+    });
+
+    tabZaloQR.addEventListener("click", () => {
+      tabZaloQR.classList.add("active");
+      tabBankQR.classList.remove("active");
+      currentQrMode = "zalopay";
+      CONFIG.recipient.bankId = "971101"; // BIN ZaloPay
+      CONFIG.recipient.bankName = "Ví Điện Tử ZaloPay";
+      if (qrScanGuide) qrScanGuide.innerHTML = "✨ <i>Mở App ZaloPay quét mã QR trên để nhận 50.000đ vào ví nhé!</i>";
+      updateVietQRDisplay();
+    });
+  }
+
+  // Sao chép STK
   const displayAccountNo = document.getElementById("displayAccountNo");
   if (displayAccountNo) {
     displayAccountNo.addEventListener("click", () => {
       const textToCopy = CONFIG.recipient.accountNo;
-      navigator.clipboard
-        .writeText(textToCopy)
-        .then(() => {
-          showToast("Đã sao chép số tài khoản vào bộ nhớ tạm!");
-        })
-        .catch(() => {
-          showToast(`Số tài khoản: ${textToCopy}`);
-        });
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast("Đã sao chép số tài khoản của Bích Trâm!");
+      }).catch(() => {
+        showToast(`Số tài khoản: ${textToCopy}`);
+      });
     });
   }
 
-  // Nút bật/tắt form nhập STK khác
+  // Đổi STK khác nếu muốn
   if (btnCustomAccount && customBankForm) {
     btnCustomAccount.addEventListener("click", () => {
       customBankForm.classList.toggle("open");
     });
   }
 
-  // Cập nhật khi bạn gái nhập STK mới
   if (btnGenerateCustomQR) {
     btnGenerateCustomQR.addEventListener("click", () => {
       const bankSelect = document.getElementById("bankSelect");
@@ -583,12 +809,9 @@ function initVietQR() {
       }
 
       CONFIG.recipient.bankId = bankSelect.value;
-      CONFIG.recipient.bankName =
-        bankSelect.options[bankSelect.selectedIndex].text;
+      CONFIG.recipient.bankName = bankSelect.options[bankSelect.selectedIndex].text;
       CONFIG.recipient.accountNo = accountInput.value.trim();
-      CONFIG.recipient.accountName = (
-        nameInput.value.trim() || "EM BE"
-      ).toUpperCase();
+      CONFIG.recipient.accountName = (nameInput.value.trim() || "PHAM THI BICH TRAM").toUpperCase();
 
       updateVietQRDisplay();
       customBankForm.classList.remove("open");
@@ -596,22 +819,16 @@ function initVietQR() {
     });
   }
 
-  // Nút gửi tin nhắn Zalo đòi quà
+  // Nút đòi ting ting qua Zalo
   const btnClaimZalo = document.getElementById("btnClaimZalo");
   if (btnClaimZalo) {
     btnClaimZalo.addEventListener("click", () => {
-      const message = `Anh yêu ơi! Em vừa vượt qua thử thách 20/10 trên website rồi nè ❤️ Mau ting ting lì xì ${CONFIG.recipient.amount.toLocaleString()}đ vào STK ${CONFIG.recipient.accountNo} (${CONFIG.recipient.bankName}) cho em nhé! Yêu anh nhiều 💕`;
+      const message = `Anh yêu ơi! Em vừa vượt qua thử thách 20/10 trên web rồi nè ❤️ Mau ting ting lì xì ${CONFIG.recipient.amount.toLocaleString()}đ vào STK ${CONFIG.recipient.accountNo} (${CONFIG.recipient.bankName}) cho Bích Trâm nhé! Yêu anh nhiều 💕`;
 
-      navigator.clipboard
-        .writeText(message)
-        .then(() => {
-          showToast(
-            "Đã chép lời nhắn đòi quà! Mở Zalo/Messenger gửi cho Anh nhé!",
-          );
-        })
-        .catch(() => {});
+      navigator.clipboard.writeText(message).then(() => {
+        showToast("Đã sao chép lời nhắn đòi quà! Mở Zalo/Messenger gửi cho Anh nhé!");
+      }).catch(() => {});
 
-      // Mở ứng dụng Zalo hoặc chia sẻ
       setTimeout(() => {
         window.open(`https://zalo.me`, "_blank");
       }, 700);
@@ -629,17 +846,16 @@ function updateVietQRDisplay() {
   const moneyAmount = document.getElementById("moneyAmount");
 
   if (displayBankName) displayBankName.textContent = CONFIG.recipient.bankName;
-  if (displayAccountNo)
-    displayAccountNo.innerHTML = `${CONFIG.recipient.accountNo} <i class="fa-regular fa-copy"></i>`;
-  if (displayAccountName)
-    displayAccountName.textContent = CONFIG.recipient.accountName;
+  if (displayAccountNo) displayAccountNo.innerHTML = `${CONFIG.recipient.accountNo} <i class="fa-regular fa-copy"></i>`;
+  if (displayAccountName) displayAccountName.textContent = CONFIG.recipient.accountName;
   if (displayMemo) displayMemo.textContent = CONFIG.recipient.memo;
-  if (moneyAmount)
-    moneyAmount.textContent = `${CONFIG.recipient.amount.toLocaleString("vi-VN")} VNĐ`;
+  if (moneyAmount) moneyAmount.textContent = `${CONFIG.recipient.amount.toLocaleString("vi-VN")} VNĐ`;
 
   if (qrLoading) qrLoading.classList.remove("hidden");
 
-  // Tạo URL QuickLink VietQR chuẩn theo ngân hàng, STK, số tiền và nội dung
+  // Tạo URL QuickLink VietQR chuẩn:
+  // Nếu quét qua App Ngân hàng, dùng mã BIN 970454 (Bản Việt)
+  // Nếu quét qua ZaloPay, dùng mã BIN 971101 (ZaloPay)
   const encodedMemo = encodeURIComponent(CONFIG.recipient.memo);
   const encodedName = encodeURIComponent(CONFIG.recipient.accountName);
   const qrUrl = `https://img.vietqr.io/image/${CONFIG.recipient.bankId}-${CONFIG.recipient.accountNo}-compact2.jpg?amount=${CONFIG.recipient.amount}&addInfo=${encodedMemo}&accountName=${encodedName}`;
@@ -649,16 +865,14 @@ function updateVietQRDisplay() {
       if (qrLoading) qrLoading.classList.add("hidden");
     };
     vietQrImg.onerror = () => {
-      if (qrLoading)
-        qrLoading.innerHTML =
-          "<span>Mã QR sẵn sàng! Vui lòng kiểm tra lại STK.</span>";
+      if (qrLoading) qrLoading.innerHTML = "<span>Mã QR sẵn sàng! Vui lòng kiểm tra lại STK.</span>";
     };
     vietQrImg.src = qrUrl;
   }
 }
 
 // ==========================================================
-// 8. POPUP LẤY MÃ QR CỦA WEBSITE ĐỂ IN LÊN THIỆP GỬI BẠN GÁI
+// 10. MODAL MÃ QR WEB CHO BẠN TRAI
 // ==========================================================
 function initShareModal() {
   const btnShareQR = document.getElementById("btnShareQR");
@@ -678,11 +892,11 @@ function initShareModal() {
       websiteQrBox.innerHTML = "";
       qrCodeInstance = new QRCode(websiteQrBox, {
         text: currentUrl,
-        width: 180,
-        height: 180,
-        colorDark: "#2c0e22",
+        width: 175,
+        height: 175,
+        colorDark: "#200819",
         colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H,
+        correctLevel: QRCode.CorrectLevel.H
       });
     }
 
