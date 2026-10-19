@@ -221,27 +221,27 @@
 
           <!-- Tùy chọn chuyển tab quét QR (Napas Ngân Hàng Bản Việt & ZaloPay) -->
           <div class="qr-switch-tabs">
-            <button class="qr-tab-btn active" id="tabBankQR" data-mode="bank">
-              <i class="fa-solid fa-wallet"></i> Mã ZaloPay Gốc Của Bích Trâm
+            <button class="qr-tab-btn active" id="tabNapasQR" data-mode="napas">
+              <i class="fa-solid fa-building-columns"></i> Quét Bằng MoMo / Mọi Ngân Hàng
             </button>
-            <button class="qr-tab-btn" id="tabNapasQR" data-mode="napas">
-              <i class="fa-solid fa-building-columns"></i> Quét Bằng Mọi App Ngân Hàng
+            <button class="qr-tab-btn" id="tabZaloQR" data-mode="zalopay">
+              <i class="fa-solid fa-wallet"></i> Quét Bằng App ZaloPay
             </button>
           </div>
 
           <!-- Khu vực hiển thị mã VietQR nhận tiền -->
           <div class="qr-payment-section">
             <div class="qr-frame">
-              <div id="zalopayQrBox"></div>
-              <img id="vietQrImg" src="" alt="Mã VietQR Chuyển Tiền Lì Xì 20/10" class="qr-image" style="display:none;">
-              <div class="qr-loading" id="qrLoading">
+              <img id="vietQrImg" src="./qr-bvb.png" alt="Mã VietQR Ngân hàng Bản Việt" class="qr-image">
+              <div id="zalopayQrBox" style="display:none;"></div>
+              <div class="qr-loading hidden" id="qrLoading">
                 <i class="fa-solid fa-spinner fa-spin"></i>
                 <span>Đang tải mã QR chuyển khoản...</span>
               </div>
             </div>
 
             <p class="qr-scan-guide" id="qrScanGuide">
-              ✨ <i>Mã ZaloPay chính thức của Bích Trâm. Anh yêu (hoặc bạn bè) quét mã này là 50.000đ ting ting về ví ngay!</i>
+              ✨ <i>Mở <b>MoMo</b> hoặc bất kỳ <b>App Ngân hàng nào (BIDV, VCB, MB, TCB...)</b> quét mã này là nhận diện ngay Bản Việt - 50.000đ!</i>
             </p>
 
             <div class="payment-info-box">
@@ -257,7 +257,7 @@
               </div>
               <div class="info-row">
                 <span class="info-label">Người nhận:</span>
-                <span class="info-value" id="displayAccountName">PHAM THI BICH TRAM</span>
+                <span class="info-value" id="displayAccountName">ZALOPAY_PHAM THI BICH TRAM</span>
               </div>
               <div class="info-row">
                 <span class="info-label">Nội dung CK:</span>

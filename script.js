@@ -10,16 +10,16 @@ const CONFIG = {
   // Thông tin nhận lì xì mặc định (Ngân hàng TMCP Bản Việt - BVBank / ZaloPay):
   // Dùng mã BIN 970454 chuẩn Napas247 để TẤT CẢ app ngân hàng (VCB, MB, TCB...) đều quét được ngay!
   recipient: {
-    bankId: "970454",                              // Mã Napas BVBank (Bản Việt)
+    bankId: "970454", // Mã Napas BVBank (Bản Việt)
     bankName: "Ngân hàng TMCP Bản Việt (BVBank)", // Tên ngân hàng
-    accountNo: "99ZP26286M80195808",              // Số tài khoản của Bích Trâm
-    accountName: "PHAM THI BICH TRAM",            // Tên chủ tài khoản
-    amount: 50000,                                 // Số tiền lì xì: 50.000đ
-    memo: "Chuc mung 20-10 em yeu"                // Nội dung chuyển khoản
+    accountNo: "99ZP26286M80195808", // Số tài khoản của Bích Trâm
+    accountName: "ZALOPAY_PHAM THI BICH TRAM", // Tên chủ tài khoản khớp 100% với giao dịch thật
+    amount: 50000, // Số tiền lì xì: 50.000đ
+    memo: "Chuc mung 20-10 em yeu", // Nội dung chuyển khoản
   },
 
   // Link bài hát: "Ngày Còn Đôi Mươi - Tiểu Mỹ"
-  bgmUrl: "https://youtu.be/2B8y347pwCg?si=Dbg8QwKEV0wGbWNc"
+  bgmUrl: "https://youtu.be/2B8y347pwCg?si=Dbg8QwKEV0wGbWNc",
 };
 
 // ==========================================================
@@ -31,7 +31,7 @@ let isMusicPlaying = false;
 let bgMusicAudio = null;
 let ytPlayer = null;
 let ytReady = false;
-let currentQrMode = "bank"; // "bank" (BVBank Napas) hoặc "zalopay"
+let currentQrMode = "napas"; // Mặc định là Napas BVBank (MoMo / Mọi App Ngân Hàng đều quét được)
 
 document.addEventListener("DOMContentLoaded", () => {
   initPetalAnimation();
@@ -101,8 +101,22 @@ function initPetalAnimation() {
 
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.bezierCurveTo(-this.size / 2, -this.size / 2, -this.size, this.size / 3, 0, this.size);
-      ctx.bezierCurveTo(this.size, this.size / 3, this.size / 2, -this.size / 2, 0, 0);
+      ctx.bezierCurveTo(
+        -this.size / 2,
+        -this.size / 2,
+        -this.size,
+        this.size / 3,
+        0,
+        this.size,
+      );
+      ctx.bezierCurveTo(
+        this.size,
+        this.size / 3,
+        this.size / 2,
+        -this.size / 2,
+        0,
+        0,
+      );
       ctx.fill();
 
       ctx.restore();
@@ -134,7 +148,9 @@ function initCountdownTimer() {
   const secondsEl = document.getElementById("secondsCount");
 
   const dateStr = CONFIG.startDate;
-  const start = (dateStr.includes("T") ? new Date(dateStr) : new Date(`${dateStr}T00:00:00`)).getTime();
+  const start = (
+    dateStr.includes("T") ? new Date(dateStr) : new Date(`${dateStr}T00:00:00`)
+  ).getTime();
 
   function update() {
     const now = new Date().getTime();
@@ -160,7 +176,9 @@ function initCountdownTimer() {
 // ==========================================================
 function extractYouTubeId(url) {
   if (!url) return null;
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/,
+  );
   return match ? match[1] : null;
 }
 
@@ -181,7 +199,7 @@ window.onYouTubeIframeAPIReady = function () {
         loop: 1,
         playlist: ytId,
         playsinline: 1,
-        modestbranding: 1
+        modestbranding: 1,
       },
       events: {
         onReady: (event) => {
@@ -200,8 +218,8 @@ window.onYouTubeIframeAPIReady = function () {
             ytPlayer.seekTo(0);
             ytPlayer.playVideo();
           }
-        }
-      }
+        },
+      },
     });
   } catch (err) {
     console.warn("YouTube Player error:", err);
@@ -234,7 +252,10 @@ function initAudio() {
       } else if (type === "pop") {
         osc.type = "triangle";
         osc.frequency.setValueAtTime(659.25, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.15);
+        osc.frequency.exponentialRampToValueAtTime(
+          1046.5,
+          ctx.currentTime + 0.15,
+        );
         gain.gain.setValueAtTime(0.15, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
         osc.start();
@@ -257,7 +278,8 @@ function initAudio() {
 
   if (!ytId) {
     bgMusicAudio = new Audio();
-    bgMusicAudio.src = "https://cdn.pixabay.com/download/audio/2022/05/16/audio_c976939433.mp3?filename=romantic-love-story-112196.mp3";
+    bgMusicAudio.src =
+      "https://cdn.pixabay.com/download/audio/2022/05/16/audio_c976939433.mp3?filename=romantic-love-story-112196.mp3";
     bgMusicAudio.loop = true;
     bgMusicAudio.volume = 0.5;
   }
@@ -280,12 +302,15 @@ function initAudio() {
         isMusicPlaying = false;
         icon?.classList.add("paused");
       } else {
-        bgMusicAudio.play().then(() => {
-          isMusicPlaying = true;
-          icon?.classList.remove("paused");
-        }).catch(() => {
-          showToast("Chạm vào màn hình để bắt đầu nghe bài hát nhé!");
-        });
+        bgMusicAudio
+          .play()
+          .then(() => {
+            isMusicPlaying = true;
+            icon?.classList.remove("paused");
+          })
+          .catch(() => {
+            showToast("Chạm vào màn hình để bắt đầu nghe bài hát nhé!");
+          });
       }
     }
   }
@@ -299,10 +324,13 @@ function initAudio() {
       if (ytId && ytPlayer && typeof ytPlayer.playVideo === "function") {
         ytPlayer.playVideo();
       } else if (bgMusicAudio) {
-        bgMusicAudio.play().then(() => {
-          isMusicPlaying = true;
-          icon?.classList.remove("paused");
-        }).catch(() => {});
+        bgMusicAudio
+          .play()
+          .then(() => {
+            isMusicPlaying = true;
+            icon?.classList.remove("paused");
+          })
+          .catch(() => {});
       }
     }
     window.removeEventListener("click", startMusicOnFirstTouch);
@@ -332,7 +360,7 @@ function initEnvelopeInteraction() {
         confetti({
           particleCount: 35,
           spread: 60,
-          origin: { y: 0.6 }
+          origin: { y: 0.6 },
         });
       }
 
@@ -433,7 +461,7 @@ function nextQuest() {
   const titles = [
     "Thử thách 1 / 3: Câu đố tình yêu",
     "Thử thách 2 / 3: Bắt trái tim yêu thương",
-    "Thử thách 3 / 3: Vòng quay may mắn 20/10"
+    "Thử thách 3 / 3: Vòng quay may mắn 20/10",
   ];
 
   if (currentQuest <= totalQuests) {
@@ -478,7 +506,7 @@ function initLoveCatcherGame() {
     y: canvas.height - 35,
     width: 64,
     height: 24,
-    color: "#ff3366"
+    color: "#ff3366",
   };
 
   // Mảng các trái tim đang rơi
@@ -516,19 +544,26 @@ function initLoveCatcherGame() {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const canvasX = (clientX - rect.left) * scaleX;
-    basket.x = Math.max(0, Math.min(canvas.width - basket.width, canvasX - basket.width / 2));
+    basket.x = Math.max(
+      0,
+      Math.min(canvas.width - basket.width, canvasX - basket.width / 2),
+    );
   }
 
   // Sự kiện chạm di chuyển trên điện thoại & chuột trên máy tính
   canvas.addEventListener("mousemove", (e) => {
     if (gameRunning) handleMove(e.clientX);
   });
-  canvas.addEventListener("touchmove", (e) => {
-    if (gameRunning && e.touches.length > 0) {
-      e.preventDefault();
-      handleMove(e.touches[0].clientX);
-    }
-  }, { passive: false });
+  canvas.addEventListener(
+    "touchmove",
+    (e) => {
+      if (gameRunning && e.touches.length > 0) {
+        e.preventDefault();
+        handleMove(e.touches[0].clientX);
+      }
+    },
+    { passive: false },
+  );
 
   btnStart.addEventListener("click", startGame);
 
@@ -563,7 +598,13 @@ function initLoveCatcherGame() {
     // Vẽ giỏ hứng tim xinh xắn
     ctx.fillStyle = basket.color;
     ctx.beginPath();
-    ctx.roundRect(basket.x, basket.y, basket.width, basket.height, [8, 8, 12, 12]);
+    ctx.roundRect(
+      basket.x,
+      basket.y,
+      basket.width,
+      basket.height,
+      [8, 8, 12, 12],
+    );
     ctx.fill();
     ctx.strokeStyle = "#ffd700";
     ctx.lineWidth = 2;
@@ -646,7 +687,7 @@ function initLuckyWheel() {
     { text: "Bao ăn món thích", color: "#8a1036", icon: "🍲" },
     { text: "Phiếu hết giận", color: "#29081e", icon: "📜" },
     { text: "Hẹn hò lãng mạn", color: "#b51442", icon: "🎬" },
-    { text: "Yêu Trâm suốt đời", color: "#4f0e31", icon: "💖" }
+    { text: "Yêu Trâm suốt đời", color: "#4f0e31", icon: "💖" },
   ];
 
   const totalSegments = segments.length;
@@ -697,13 +738,14 @@ function initLuckyWheel() {
   btnSpin.addEventListener("click", () => {
     if (isSpinning) return;
     isSpinning = true;
-    if (wheelHint) wheelHint.textContent = "Vòng quay đang xoay vèo vèo... Hồi hộp quá!";
+    if (wheelHint)
+      wheelHint.textContent = "Vòng quay đang xoay vèo vèo... Hồi hộp quá!";
 
     // Tính toán góc quay để kim dừng trúng ngay ô "Lì xì 50k 20/10" (Ô số 0)
     // Kim ở đỉnh (270 độ = 1.5 * PI)
     const extraRotations = 5 * 360; // 5 vòng quay
     // Ô 0 trải dài từ 0 đến 60 độ. Để kim ở đỉnh chỉ vào ô 0:
-    const targetAngle = extraRotations + (270 - 30); 
+    const targetAngle = extraRotations + (270 - 30);
 
     canvas.style.transform = `rotate(${targetAngle}deg)`;
 
@@ -738,8 +780,18 @@ function launchVictoryConfetti() {
     if (timeLeft <= 0) return clearInterval(interval);
 
     const particleCount = 45 * (timeLeft / duration);
-    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+    confetti(
+      Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+      }),
+    );
+    confetti(
+      Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+      }),
+    );
   }, 250);
 }
 
@@ -747,31 +799,38 @@ function launchVictoryConfetti() {
 // 9. MÃ VIETQR CHUẨN NAPAS247 (QUÉT ĐƯỢC 100%)
 // ==========================================================
 // Chuỗi mã QR ZaloPay chính thức của Phạm Thị Bích Trâm (được trích xuất trực tiếp từ ảnh gốc)
-const EXACT_ZALOPAY_QR_STRING = "00020101021126400010vn.zalopay0115ghEsu2IXKnIlZza020300238620010A00000072701320006970454011899ZP26286M801958080208QRIBFTTA5204739953037045802VN63048462";
+const EXACT_ZALOPAY_QR_STRING =
+  "00020101021126400010vn.zalopay0115ghEsu2IXKnIlZza020300238620010A00000072701320006970454011899ZP26286M801958080208QRIBFTTA5204739953037045802VN63048462";
 
 function initVietQR() {
-  const tabBankQR = document.getElementById("tabBankQR");
   const tabNapasQR = document.getElementById("tabNapasQR");
+  const tabZaloQR = document.getElementById("tabZaloQR");
   const qrScanGuide = document.getElementById("qrScanGuide");
   const btnCustomAccount = document.getElementById("btnCustomAccount");
   const customBankForm = document.getElementById("customBankForm");
   const btnGenerateCustomQR = document.getElementById("btnGenerateCustomQR");
 
-  // Tab chuyển đổi quét bằng ZaloPay gốc hoặc Napas Bản Việt
-  if (tabBankQR && tabNapasQR) {
-    tabBankQR.addEventListener("click", () => {
-      tabBankQR.classList.add("active");
-      tabNapasQR.classList.remove("active");
-      currentQrMode = "zalopay";
-      if (qrScanGuide) qrScanGuide.innerHTML = "✨ <i>Mã ZaloPay gốc của Bích Trâm. Anh yêu (hoặc bạn bè) quét mã này bằng ZaloPay hoặc App Ngân hàng là 50.000đ ting ting về ví ngay!</i>";
+  // Tab chuyển đổi quét bằng MoMo/Ngân Hàng (Napas) hoặc ZaloPay
+  if (tabNapasQR && tabZaloQR) {
+    tabNapasQR.addEventListener("click", () => {
+      tabNapasQR.classList.add("active");
+      tabZaloQR.classList.remove("active");
+      currentQrMode = "napas";
+      if (qrScanGuide) {
+        qrScanGuide.innerHTML =
+          "✨ <i>Mở <b>MoMo</b> hoặc bất kỳ <b>App Ngân hàng nào (BIDV, VCB, MB, TCB...)</b> quét mã này là nhận diện ngay Bản Việt - 50.000đ!</i>";
+      }
       updateVietQRDisplay();
     });
 
-    tabNapasQR.addEventListener("click", () => {
-      tabNapasQR.classList.add("active");
-      tabBankQR.classList.remove("active");
-      currentQrMode = "napas";
-      if (qrScanGuide) qrScanGuide.innerHTML = "✨ <i>Dùng bất kỳ App Ngân hàng nào (VCB, MB, Techcombank, VPBank...) quét mã VietQR Napas này nhé!</i>";
+    tabZaloQR.addEventListener("click", () => {
+      tabZaloQR.classList.add("active");
+      tabNapasQR.classList.remove("active");
+      currentQrMode = "zalopay";
+      if (qrScanGuide) {
+        qrScanGuide.innerHTML =
+          "✨ <i>Mở <b>App ZaloPay</b> hoặc ứng dụng <b>Zalo</b> quét mã này để chuyển thẳng vào ví Bích Trâm!</i>";
+      }
       updateVietQRDisplay();
     });
   }
@@ -781,11 +840,14 @@ function initVietQR() {
   if (displayAccountNo) {
     displayAccountNo.addEventListener("click", () => {
       const textToCopy = CONFIG.recipient.accountNo;
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        showToast("Đã sao chép số tài khoản của Bích Trâm!");
-      }).catch(() => {
-        showToast(`Số tài khoản: ${textToCopy}`);
-      });
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          showToast("Đã sao chép số tài khoản của Bích Trâm!");
+        })
+        .catch(() => {
+          showToast(`Số tài khoản: ${textToCopy}`);
+        });
     });
   }
 
@@ -808,9 +870,12 @@ function initVietQR() {
       }
 
       CONFIG.recipient.bankId = bankSelect.value;
-      CONFIG.recipient.bankName = bankSelect.options[bankSelect.selectedIndex].text;
+      CONFIG.recipient.bankName =
+        bankSelect.options[bankSelect.selectedIndex].text;
       CONFIG.recipient.accountNo = accountInput.value.trim();
-      CONFIG.recipient.accountName = (nameInput.value.trim() || "PHAM THI BICH TRAM").toUpperCase();
+      CONFIG.recipient.accountName = (
+        nameInput.value.trim() || "ZALOPAY_PHAM THI BICH TRAM"
+      ).toUpperCase();
 
       currentQrMode = "napas";
       updateVietQRDisplay();
@@ -825,15 +890,21 @@ function initVietQR() {
     btnClaimZalo.addEventListener("click", () => {
       const message = `Anh yêu ơi! Em vừa vượt qua thử thách 20/10 trên web rồi nè ❤️ Mau ting ting lì xì ${CONFIG.recipient.amount.toLocaleString()}đ vào ví ZaloPay cho Bích Trâm nhé! Yêu anh nhiều 💕`;
 
-      navigator.clipboard.writeText(message).then(() => {
-        showToast("Đã sao chép lời nhắn đòi quà! Mở Zalo gửi cho Anh nhé!");
-      }).catch(() => {});
+      navigator.clipboard
+        .writeText(message)
+        .then(() => {
+          showToast("Đã sao chép lời nhắn đòi quà! Mở Zalo gửi cho Anh nhé!");
+        })
+        .catch(() => {});
 
       setTimeout(() => {
         window.open(`https://zalo.me`, "_blank");
       }, 700);
     });
   }
+
+  // Gọi cập nhật hiển thị mã QR ngay khi khởi tạo
+  updateVietQRDisplay();
 }
 
 function updateVietQRDisplay() {
@@ -847,13 +918,16 @@ function updateVietQRDisplay() {
   const moneyAmount = document.getElementById("moneyAmount");
 
   if (displayBankName) displayBankName.textContent = CONFIG.recipient.bankName;
-  if (displayAccountNo) displayAccountNo.innerHTML = `${CONFIG.recipient.accountNo} <i class="fa-regular fa-copy"></i>`;
-  if (displayAccountName) displayAccountName.textContent = CONFIG.recipient.accountName;
+  if (displayAccountNo)
+    displayAccountNo.innerHTML = `${CONFIG.recipient.accountNo} <i class="fa-regular fa-copy"></i>`;
+  if (displayAccountName)
+    displayAccountName.textContent = CONFIG.recipient.accountName;
   if (displayMemo) displayMemo.textContent = CONFIG.recipient.memo;
-  if (moneyAmount) moneyAmount.textContent = `${CONFIG.recipient.amount.toLocaleString("vi-VN")} VNĐ`;
+  if (moneyAmount)
+    moneyAmount.textContent = `${CONFIG.recipient.amount.toLocaleString("vi-VN")} VNĐ`;
 
-  if (currentQrMode === "zalopay" || currentQrMode === "bank") {
-    // Vẽ mã QR ZaloPay chính thức 100% bằng QRCode.js
+  if (currentQrMode === "zalopay") {
+    // Vẽ mã QR ZaloPay chính thức bằng QRCode.js
     if (vietQrImg) vietQrImg.style.display = "none";
     if (zalopayQrBox) {
       zalopayQrBox.style.display = "block";
@@ -861,31 +935,22 @@ function updateVietQRDisplay() {
       if (typeof QRCode !== "undefined") {
         new QRCode(zalopayQrBox, {
           text: EXACT_ZALOPAY_QR_STRING,
-          width: 185,
-          height: 185,
-          colorDark: "#1a0815",
+          width: 195,
+          height: 195,
+          colorDark: "#000000",
           colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.M
+          correctLevel: QRCode.CorrectLevel.M,
         });
       }
     }
     if (qrLoading) qrLoading.classList.add("hidden");
   } else {
-    // Vẽ mã Napas ngân hàng Bản Việt
+    // Chế độ Napas: Quét bằng MoMo / Mọi App Ngân Hàng (BIDV, VCB, MB, TCB...)
     if (zalopayQrBox) zalopayQrBox.style.display = "none";
     if (vietQrImg) {
       vietQrImg.style.display = "block";
-      if (qrLoading) qrLoading.classList.remove("hidden");
-      const encodedMemo = encodeURIComponent(CONFIG.recipient.memo);
-      const encodedName = encodeURIComponent(CONFIG.recipient.accountName);
-      const qrUrl = `https://img.vietqr.io/image/970454-${CONFIG.recipient.accountNo}-compact2.jpg?amount=${CONFIG.recipient.amount}&addInfo=${encodedMemo}&accountName=${encodedName}`;
-      vietQrImg.onload = () => {
-        if (qrLoading) qrLoading.classList.add("hidden");
-      };
-      vietQrImg.onerror = () => {
-        if (qrLoading) qrLoading.classList.add("hidden");
-      };
-      vietQrImg.src = qrUrl;
+      vietQrImg.src = "./qr-bvb.png";
+      if (qrLoading) qrLoading.classList.add("hidden");
     }
   }
 }
@@ -915,7 +980,7 @@ function initShareModal() {
         height: 175,
         colorDark: "#200819",
         colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.H,
       });
     }
 
