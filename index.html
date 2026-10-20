@@ -48,7 +48,7 @@
     <!-- Hiệu ứng cánh hoa rơi nền Canvas -->
     <canvas id="petalCanvas"></canvas>
 
-    <!-- Nút điều khiển âm thanh & Nút lấy mã QR web cho bạn trai -->
+    <!-- Nút điều khiển âm thanh đĩa nhạc -->
     <div class="top-controls">
       <button
         id="btnMusic"
@@ -57,14 +57,6 @@
       >
         <i class="fa-solid fa-compact-disc spin-record paused"></i>
         <span class="music-tooltip">Nhạc 20/10</span>
-      </button>
-      <button
-        id="btnShareQR"
-        class="control-btn"
-        title="Lấy mã QR gửi cho Bích Trâm"
-      >
-        <i class="fa-solid fa-qrcode"></i>
-        <span class="music-tooltip">Mã QR Web</span>
       </button>
     </div>
 
@@ -407,54 +399,7 @@
       </div>
     </div>
 
-    <!-- ==================== MODAL: LẤY MÃ QR CỦA TRANG WEB CHO BẠN TRAI ==================== -->
-    <div class="modal-backdrop" id="qrShareModal">
-      <div class="modal-card">
-        <button class="modal-close-btn" id="btnCloseModal">&times;</button>
-        <div class="modal-icon"><i class="fa-solid fa-qrcode"></i></div>
-        <h3 class="modal-title">Mã QR Mở Trang Web</h3>
-        <p class="modal-desc">
-          Dùng <b>Camera thường của điện thoại</b> quét mã này để mở web (hoặc
-          in lên thiệp gửi Bích Trâm nhé)!
-        </p>
 
-        <div class="web-qr-container">
-          <div id="websiteQrBox"></div>
-        </div>
-
-        <div class="url-input-box">
-          <input type="text" id="webUrlInput" readonly class="form-control" />
-          <button id="btnCopyUrl" class="primary-btn small-btn">
-            <i class="fa-regular fa-copy"></i> Chép Link
-          </button>
-        </div>
-
-        <div class="modal-warning-box">
-          <i
-            class="fa-solid fa-triangle-exclamation"
-            style="color: #f59e0b"
-          ></i>
-          <b>Lưu ý:</b> Đây là mã link trang web (dùng camera thường).
-          <b>Không dùng MoMo hay app ngân hàng để quét mã này!</b>
-        </div>
-
-        <button
-          id="btnQuickJumpReward"
-          class="secondary-btn"
-          style="width: 100%; margin-top: 10px"
-        >
-          <i class="fa-solid fa-puzzle-piece"></i> Nhảy ngay đến Vòng 3 (Ghép tranh Bích Trâm) để thử
-        </button>
-
-        <p class="modal-hint" style="margin-top: 12px">
-          <i class="fa-regular fa-lightbulb" style="color: #f5c518"></i>
-          <i
-            >Mẹo: Sau khi bạn đưa web lên Vercel / Render, link web sẽ tự động
-            xuất hiện ở đây để bạn gái ở xa có thể quét mở web!</i
-          >
-        </p>
-      </div>
-    </div>
 
     <!-- Container phát nhạc YouTube ngầm (hiển thị kích thước hợp lệ trong viewport nhưng trong suốt để không bị trình duyệt chặn phát lại) -->
     <div

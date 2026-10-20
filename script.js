@@ -38,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initRunawayButton();
   initLoveCatcherGame();
   initBlockBlastGame();
-  initShareModal();
   restoreAppState();
 });
 
@@ -1870,101 +1869,7 @@ function launchVictoryConfetti() {
 
 
 
-// ==========================================================
-// 10. MODAL MÃ QR WEB CHO BẠN TRAI
-// ==========================================================
-function initShareModal() {
-  const btnShareQR = document.getElementById("btnShareQR");
-  const qrShareModal = document.getElementById("qrShareModal");
-  const btnCloseModal = document.getElementById("btnCloseModal");
-  const websiteQrBox = document.getElementById("websiteQrBox");
-  const webUrlInput = document.getElementById("webUrlInput");
-  const btnCopyUrl = document.getElementById("btnCopyUrl");
-  const btnQuickJumpReward = document.getElementById("btnQuickJumpReward");
 
-  let qrCodeInstance = null;
-
-  function openModal() {
-    let currentUrl = window.location.href;
-    // Nếu đang chạy thử nghiệm trên máy tính (localhost), dùng IP mạng Wi-Fi để điện thoại quét được
-    if (
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-    ) {
-      currentUrl = "http://192.168.1.5:5173/";
-    }
-    if (webUrlInput) webUrlInput.value = currentUrl;
-
-    if (websiteQrBox && typeof QRCode !== "undefined") {
-      websiteQrBox.innerHTML = "";
-      qrCodeInstance = new QRCode(websiteQrBox, {
-        text: currentUrl,
-        width: 175,
-        height: 175,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M,
-      });
-    }
-
-    if (qrShareModal) qrShareModal.classList.add("open");
-  }
-
-  function closeModal() {
-    if (qrShareModal) qrShareModal.classList.remove("open");
-  }
-
-  if (btnShareQR) btnShareQR.addEventListener("click", openModal);
-  if (btnCloseModal) btnCloseModal.addEventListener("click", closeModal);
-  if (qrShareModal) {
-    qrShareModal.addEventListener("click", (e) => {
-      if (e.target === qrShareModal) closeModal();
-    });
-  }
-
-  if (btnCopyUrl && webUrlInput) {
-    btnCopyUrl.addEventListener("click", () => {
-      navigator.clipboard.writeText(webUrlInput.value).then(() => {
-        showToast("Đã chép link website vào bộ nhớ tạm!");
-      });
-    });
-  }
-
-  // Nút nhảy nhanh đến thử thách 3 (Ghép tranh Bích Trâm) để bạn trai test
-  if (btnQuickJumpReward) {
-    btnQuickJumpReward.addEventListener("click", () => {
-      closeModal();
-      document.querySelectorAll(".screen-section").forEach((s) => {
-        s.classList.remove("active");
-        s.style.display = "none";
-      });
-      const stepQuest = document.getElementById("stepQuest");
-      if (stepQuest) {
-        stepQuest.style.display = "block";
-        setTimeout(() => stepQuest.classList.add("active"), 30);
-      }
-      currentQuest = 3;
-      for (let i = 1; i <= 3; i++) {
-        const panel = document.getElementById(`quest${i}`);
-        if (panel) {
-          if (i === 3) {
-            panel.classList.add("active");
-            panel.style.display = "block";
-          } else {
-            panel.classList.remove("active");
-            panel.style.display = "none";
-          }
-        }
-      }
-      const progressFill = document.getElementById("progressFill");
-      const questIndicator = document.getElementById("questIndicator");
-      if (progressFill) progressFill.style.width = "100%";
-      if (questIndicator)
-        questIndicator.textContent = "Thử thách 3 / 3: Mảnh ghép tình yêu";
-      showToast("Đã mở Vòng 3 (Ghép tranh Bích Trâm) để bạn test thử!");
-    });
-  }
-}
 
 // ==========================================================
 // THÔNG BÁO TOAST TIỆN ÍCH
